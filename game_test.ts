@@ -3,7 +3,7 @@
  
 QUnit.module("generator.ts tests");
  
-test("Can generate string", function () {
+test("Player Debug Output", function () {
     // Arrange
     var thing = new Thing(new Vector.Vector(1,2,3),Things.Player, function(thing:Thing){});
  
