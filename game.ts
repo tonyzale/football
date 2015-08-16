@@ -2,9 +2,14 @@
 
 enum Things {Player};
 
+interface UpdateLogic {
+    update(thing:Thing): void;
+}
+
 class Thing {
-    constructor(public pos: Vector.Vector, public type: Things, public update: (thing:Thing)=>void){}
+    constructor(public pos: Vector.Vector, public type: Things, private updatable?: UpdateLogic){}
     toString(): String {return Things[this.type] + ": " + this.pos;}
+    update() {this.updatable && this.updatable.update(this);}
 }
 
 class Scene {

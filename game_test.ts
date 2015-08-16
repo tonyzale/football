@@ -3,8 +3,8 @@
  
 QUnit.module("generator.ts tests");
 
-function MakeNewThing() : Thing {
-    return new Thing(new Vector.Vector(1,2,3), Things.Player, function(thing:Thing){});
+function MakeNewThing(updatable?:UpdateLogic) : Thing {
+    return new Thing(new Vector.Vector(1,2,3), Things.Player, updatable);
 }
  
 test("Player Debug Output", function () {
@@ -22,3 +22,20 @@ test("Scene", function() {
    
    equal(scene + "", "Player: (1,2,3)\nPlayer: (1,2,3)")
 });
+
+class TestUpdatable implements UpdateLogic {
+    update(thing:Thing) {
+        if (thing.pos.x < 3) {
+            thing.pos.x += 1;
+        }
+    }
+}
+
+test("UpdateLogic", function() {
+    var thing = MakeNewThing(new TestUpdatable());
+    equal(thing + "", "Player: (1,2,3)");
+    thing.update();
+    equal(thing + "", "Player: (2,2,3)");
+    thing.update();
+    equal(thing + "", "Player: (3,2,3)");
+})

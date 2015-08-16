@@ -5,5 +5,5 @@
 		"**/.git": true,
 		"**/.DS_Store": true,
 		"**/*.js": true
-	},
+	}
 }
