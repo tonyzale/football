@@ -4,7 +4,7 @@
 QUnit.module("generator.ts tests");
 
 function MakeNewThing(updatable?:UpdateLogic) : Thing {
-    return new Thing(new Vector.Vector(1,2,3), Things.Player, updatable);
+    return new Thing(new Vector.Vector(1,2,3), Things.Player, updatable, 1);
 }
  
 test("Player Debug Output", function () {
@@ -38,4 +38,15 @@ test("UpdateLogic", function() {
     equal(thing + "", "Player: (2,2,3)");
     thing.update();
     equal(thing + "", "Player: (3,2,3)");
+})
+
+test("RouteFollower", function() {
+    var thing = MakeNewThing(new RouteFollower([new Vector.Vector(1,0,3), new Vector.Vector(1,0,2)]));
+    equal(thing + "", "Player: (1,2,3)");
+    thing.update();
+    equal(thing + "", "Player: (1,1,3)");
+    thing.update();
+    equal(thing + "", "Player: (1,0,3)");
+    thing.update();
+    equal(thing + "", "Player: (1,0,2)");
 })
