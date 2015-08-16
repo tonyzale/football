@@ -7,6 +7,7 @@ class Thing {
     toString(): String {return Things[this.type] + ": " + this.pos;}
 }
 
-interface Scene {
-    things: Thing[];
+class Scene {
+    things: Thing[] = [];
+    toString(): String {return this.things.join('\n');}
 }
