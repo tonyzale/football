@@ -20,12 +20,30 @@
 	// Show the output window only if unrecognized errors occur. 
 	"showOutput": "always",
 	
-	// args is the HelloWorld program to compile.
-	"args": ["--out", "out.js", "game.ts"],
-	
-	// use the standard tsc problem matcher to find compile problems
-	// in the output.
-	"problemMatcher": "$tsc"
+	"tasks": [
+		{
+			"taskName": "Build",
+			"isBuildCommand": true,
+			// args is the HelloWorld program to compile.
+			"args": ["game.ts"],
+				
+			// use the standard tsc problem matcher to find compile problems
+			// in the output.
+			"problemMatcher": "$tsc",
+			"suppressTaskName": true
+		},
+		{
+			"taskName": "Build Tests",
+			"isTestCommand": true,
+			// args is the HelloWorld program to compile.
+			"args": ["game_test.ts"],
+				
+			// use the standard tsc problem matcher to find compile problems
+			// in the output.
+			"problemMatcher": "$tsc",
+			"suppressTaskName": true
+		}
+	]
 }
 
 // A task runner that calls the Typescipt compiler (tsc) and 

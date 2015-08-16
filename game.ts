@@ -2,10 +2,9 @@
 
 enum Things {Player};
 
-interface Thing {
-    pos: Vector.Vector;
-    type: Things;
-    update(thing: Thing): void;
+class Thing {
+    constructor(public pos: Vector.Vector, public type: Things, public update: (thing:Thing)=>void){}
+    toString(): String {return Things[this.type] + ": " + this.pos;}
 }
 
 interface Scene {
