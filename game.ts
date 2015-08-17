@@ -16,7 +16,7 @@ class RouteFollower {
             var dist_to_next_waypoint = Vector.Vector.mag(diff);
             if (dist_to_next_waypoint > dist_to_travel) {
                 var normalized = Vector.Vector.norm(diff);
-                var delta = Vector.Vector.times(thing.speed, normalized);
+                var delta = Vector.Vector.times(dist_to_travel, normalized);
                 thing.pos = Vector.Vector.plus(thing.pos, delta);
                 break;
             } else {

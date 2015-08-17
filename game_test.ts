@@ -33,20 +33,36 @@ class TestUpdatable implements UpdateLogic {
 
 test("UpdateLogic", function() {
     var thing = MakeNewThing(new TestUpdatable());
-    equal(thing + "", "Player: (1,2,3)");
+    deepEqual(thing.pos, new Vector.Vector(1,2,3));
     thing.update();
-    equal(thing + "", "Player: (2,2,3)");
+    deepEqual(thing.pos, new Vector.Vector(2,2,3));
     thing.update();
-    equal(thing + "", "Player: (3,2,3)");
+    deepEqual(thing.pos, new Vector.Vector(3,2,3));
 })
 
 test("RouteFollower", function() {
     var thing = MakeNewThing(new RouteFollower([new Vector.Vector(1,0,3), new Vector.Vector(1,0,2)]));
-    equal(thing + "", "Player: (1,2,3)");
+    deepEqual(thing.pos, new Vector.Vector(1,2,3));
     thing.update();
-    equal(thing + "", "Player: (1,1,3)");
+    deepEqual(thing.pos, new Vector.Vector(1,1,3));
     thing.update();
-    equal(thing + "", "Player: (1,0,3)");
+    deepEqual(thing.pos, new Vector.Vector(1,0,3));
     thing.update();
-    equal(thing + "", "Player: (1,0,2)");
+    deepEqual(thing.pos, new Vector.Vector(1,0,2));
+})
+
+test("SpeedOffsetRouteFollower", function() {
+    var thing =  new Thing(new Vector.Vector(1,2,3), Things.Player,
+        new RouteFollower([new Vector.Vector(1,0,3), new Vector.Vector(1,0,2)]), 0.6);
+    ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,2,3)) < 0.01);
+    thing.update();
+    ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,1.4,3)) < 0.01);
+    thing.update();
+    ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0.8,3)) < 0.01);
+    thing.update();
+    ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0.2,3)) < 0.01);
+    thing.update();
+    ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0,2.6)) < 0.01);
+    thing.update();
+    ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0,2.0)) < 0.01);
 })

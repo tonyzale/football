@@ -15,6 +15,7 @@ module Vector {
             var div = (mag === 0) ? Infinity : 1.0 / mag;
             return Vector.times(div, v);
         }
+        static dist(v1: Vector, v2: Vector) { return this.mag(this.minus(v1, v2)); }
         static cross(v1: Vector, v2: Vector) {
             return new Vector(v1.y * v2.z - v1.z * v2.y,
                             v1.z * v2.x - v1.x * v2.z,
