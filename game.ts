@@ -65,9 +65,27 @@ class FieldDrawer {
     }
 }
 
+class PlayerDrawer {
+    draw(thing: Thing, canvas: HTMLCanvasElement) {
+        var context = canvas.getContext("2d");
+        context.beginPath();
+        context.arc(thing.pos.x, thing.pos.y, 4, 0, 2 * Math.PI, false);
+        context.fillStyle = 'red';
+        context.fill();
+        context.lineWidth = 1;
+        context.strokeStyle = '#003300';
+        context.stroke();
+    }
+}
+
 class Game {
     constructor(private canvas: HTMLCanvasElement){
         this.scene.things.push(new Thing(new Vector.Vector(0,0,0), Things.Field,null,new FieldDrawer()));
+        this.scene.things.push(new Thing(
+            new Vector.Vector(60,6,0), Things.Player,
+            new RouteFollower(
+                [new Vector.Vector(300, 6, 0), new Vector.Vector(300, 240, 0), new Vector.Vector(60, 240, 0)],
+                0.8), new PlayerDrawer()));
         window.setInterval(this.update, 16.666);
     }
     update = () => { 
