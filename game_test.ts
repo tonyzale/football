@@ -1,10 +1,10 @@
 ///<reference path="../DefinitelyTyped/qunit/qunit.d.ts"/>
 ///<reference path="game.ts"/>
  
-QUnit.module("generator.ts tests");
+QUnit.module("scene and thing tests");
 
 function MakeNewThing(updatable?:UpdateLogic) : Thing {
-    return new Thing(new Vector.Vector(1,2,3), Things.Player, updatable, 1);
+    return new Thing(new Vector.Vector(1,2,3), Things.Player, updatable);
 }
  
 test("Player Debug Output", function () {
@@ -41,7 +41,7 @@ test("UpdateLogic", function() {
 })
 
 test("RouteFollower", function() {
-    var thing = MakeNewThing(new RouteFollower([new Vector.Vector(1,0,3), new Vector.Vector(1,0,2)]));
+    var thing = MakeNewThing(new RouteFollower([new Vector.Vector(1,0,3), new Vector.Vector(1,0,2)], 1));
     deepEqual(thing.pos, new Vector.Vector(1,2,3));
     thing.update();
     deepEqual(thing.pos, new Vector.Vector(1,1,3));
@@ -53,7 +53,7 @@ test("RouteFollower", function() {
 
 test("SpeedOffsetRouteFollower", function() {
     var thing =  new Thing(new Vector.Vector(1,2,3), Things.Player,
-        new RouteFollower([new Vector.Vector(1,0,3), new Vector.Vector(1,0,2)]), 0.6);
+        new RouteFollower([new Vector.Vector(1,0,3), new Vector.Vector(1,0,2)], 0.6));
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,2,3)) < 0.01);
     thing.update();
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,1.4,3)) < 0.01);
