@@ -1,6 +1,6 @@
 /// <reference path="vector.ts" />
 
-enum Things {Player, Field};
+enum Things {Player, Field, Ball};
 
 interface UpdateLogic {
     update(thing:Thing): void;
@@ -37,6 +37,7 @@ class Thing {
     toString(): String {return Things[this.type] + ": " + this.pos;}
     update() {this.updatable && this.updatable.update(this);}
     draw(canvas: HTMLCanvasElement) { this.draw_logic && this.draw_logic.draw(this, canvas);}
+    possessions: Thing[] = [];
 }
 
 class Scene {
@@ -66,15 +67,18 @@ class FieldDrawer {
 }
 
 class PlayerDrawer {
+    constructor(public color: string){}
     draw(thing: Thing, canvas: HTMLCanvasElement) {
         var context = canvas.getContext("2d");
         context.beginPath();
         context.arc(thing.pos.x, thing.pos.y, 4, 0, 2 * Math.PI, false);
-        context.fillStyle = 'red';
+        context.fillStyle = this.color;
         context.fill();
-        context.lineWidth = 1;
-        context.strokeStyle = '#003300';
-        context.stroke();
+        if (thing.possessions.some(t=>{return (t.type==Things.Ball);})) {
+            context.lineWidth = 2;
+            context.strokeStyle = 'brown';
+            context.stroke();
+        }
     }
 }
 
@@ -85,7 +89,14 @@ class Game {
             new Vector.Vector(60,6,0), Things.Player,
             new RouteFollower(
                 [new Vector.Vector(300, 6, 0), new Vector.Vector(300, 240, 0), new Vector.Vector(60, 240, 0)],
-                0.8), new PlayerDrawer()));
+                0.8), new PlayerDrawer('red')));
+         var ball_carrier: Thing;
+         this.scene.things.push(ball_carrier = new Thing(
+            new Vector.Vector(660,6,0), Things.Player,
+            new RouteFollower(
+                [new Vector.Vector(420, 6, 0), new Vector.Vector(420, 240, 0), new Vector.Vector(660, 240, 0)],
+                0.8), new PlayerDrawer('blue')));    
+         ball_carrier.possessions.push(new Thing(new Vector.Vector(0,0,0), Things.Ball))
         window.setInterval(this.update, 16.666);
     }
     update = () => { 
