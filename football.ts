@@ -24,15 +24,15 @@ class FieldDrawer {
 
 class Game {
     constructor(private canvas: HTMLCanvasElement){
-        this.scene.things.push(new Thing(new Vector.Vector(0,0,0), Things.Field,null,new FieldDrawer()));
+        this.scene.things.push(new Thing(new Vector.Vector(0,0,0), Things.Field,null,null,new FieldDrawer()));
         this.scene.things.push(new Thing(
-            new Vector.Vector(60,6,0), Things.Player,
+            new Vector.Vector(60,6,0), Things.Player, 4,
             new RouteFollower(
                 [new Vector.Vector(300, 6, 0), new Vector.Vector(300, 240, 0), new Vector.Vector(60, 240, 0)],
                 0.8), new PlayerDrawer('red')));
          var ball_carrier: Thing;
          this.scene.things.push(ball_carrier = new Thing(
-            new Vector.Vector(660,6,0), Things.Player,
+            new Vector.Vector(660,6,0), Things.Player, 4,
             new RouteFollower(
                 [new Vector.Vector(420, 6, 0), new Vector.Vector(420, 240, 0), new Vector.Vector(660, 240, 0)],
                 0.8), new PlayerDrawer('blue')));    
