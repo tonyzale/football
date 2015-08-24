@@ -1,4 +1,5 @@
 /// <reference path="vector.ts" />
+/// <reference path="circular_buffer.ts" />
 
 enum Things {Player, Field, Ball};
 
@@ -11,12 +12,18 @@ interface DrawLogic {
 }
 
 class Thing {
-    constructor(public pos: Vector.Vector, public type: Things, public radius?: number, private updatable?: UpdateLogic, private draw_logic?: DrawLogic){}
+    constructor(public pos: Vector.Vector, public type: Things, public radius?: number, private updatable?: UpdateLogic, private draw_logic?: DrawLogic){
+        this.pos_history.push(pos);
+    }
     toString(): String {return Things[this.type] + ": " + this.pos;}
-    update() {this.updatable && this.updatable.update(this);}
+    update() {
+        this.updatable && this.updatable.update(this);
+        this.pos_history.push(this.pos);
+    }
     draw(canvas: HTMLCanvasElement) { this.draw_logic && this.draw_logic.draw(this, canvas);}
     possessions: Thing[] = [];
     isColliding(other: Thing): boolean { return false; }
+    pos_history: CircularBuffer<Vector.Vector> = new CircularBuffer<Vector.Vector>(10);
 }
 
 class Collision {

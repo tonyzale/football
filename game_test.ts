@@ -52,17 +52,28 @@ test("RouteFollower", function() {
 test("SpeedOffsetRouteFollower", function() {
     var thing =  new Thing(new Vector.Vector(1,2,3), Things.Player,null,
         new RouteFollower([new Vector.Vector(1,0,3), new Vector.Vector(1,0,2)], 0.6));
+    var history: Vector.Vector[] = [];
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,2,3)) < 0.01);
+    history.push(thing.pos);
     thing.update();
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,1.4,3)) < 0.01);
+    history.push(thing.pos);
     thing.update();
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0.8,3)) < 0.01);
+    history.push(thing.pos);
     thing.update();
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0.2,3)) < 0.01);
+    history.push(thing.pos);
     thing.update();
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0,2.6)) < 0.01);
+    history.push(thing.pos);
     thing.update();
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0,2.0)) < 0.01);
+    history.push(thing.pos);
+    equal(thing.pos_history.buffer.length, 6);
+    for (var i = 0; i < 6; i++) {
+        deepEqual(thing.pos_history.buffer[i], history[i]);
+    }
 })
 
 test("Collisions", function() {
