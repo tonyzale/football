@@ -4,12 +4,21 @@
   <meta charset="utf-8">
   <title>Football</title>
   <script src="Vector.js"></script>
+  <script src="circular_buffer.js"></script>
   <script src="game.js"></script>
   <script src="player.js"></script>
 </head>
 <body>
 	<canvas id="field" width=720 height=320></canvas>
 	<script src="football.js"></script>
-	<script>new Game(document.getElementById("field"));</script>
+	<script>
+    var g = new Game(document.getElementById("field"));
+  </script>
+  <div>
+    Add Player
+    <input type="number" name="x" id="xpos" value=0></input>
+    <input type="number" name="y" id="ypos" value=0></input>
+    <button onclick="g.newPlayer()">Add Player</button>
+  </div>
 </body>
 </html>

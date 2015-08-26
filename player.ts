@@ -24,10 +24,10 @@ class RouteFollower {
 
 class PlayerDrawer {
     constructor(public color: string){}
-    draw(thing: Thing, canvas: HTMLCanvasElement) {
+    draw(thing: Thing, canvas: HTMLCanvasElement, pixels_per_inch: number) {
         var context = canvas.getContext("2d");
         context.beginPath();
-        context.arc(thing.pos.x, thing.pos.y, 4, 0, 2 * Math.PI, false);
+        context.arc(thing.pos.x * pixels_per_inch, thing.pos.y * pixels_per_inch, thing.radius * pixels_per_inch, 0, 2 * Math.PI, false);
         context.fillStyle = this.color;
         context.fill();
         if (thing.possessions.some(t=>{return (t.type==Things.Ball);})) {

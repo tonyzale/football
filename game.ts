@@ -8,7 +8,7 @@ interface UpdateLogic {
 }
 
 interface DrawLogic {
-    draw(thing: Thing, canvas: HTMLCanvasElement): void;
+    draw(thing: Thing, canvas: HTMLCanvasElement, pixels_per_inch: number): void;
 }
 
 class Thing {
@@ -20,7 +20,7 @@ class Thing {
         this.updatable && this.updatable.update(this);
         this.pos_history.push(this.pos);
     }
-    draw(canvas: HTMLCanvasElement) { this.draw_logic && this.draw_logic.draw(this, canvas);}
+    draw(canvas: HTMLCanvasElement, pixels_per_inch: number) { this.draw_logic && this.draw_logic.draw(this, canvas, pixels_per_inch);}
     possessions: Thing[] = [];
     isColliding(other: Thing): boolean { return false; }
     pos_history: CircularBuffer<Vector.Vector> = new CircularBuffer<Vector.Vector>(10);
