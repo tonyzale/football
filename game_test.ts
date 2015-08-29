@@ -38,6 +38,20 @@ test("UpdateLogic", function() {
     deepEqual(thing.pos, new Vector.Vector(3,2,3));
 })
 
+test("UpdateStack", function() {
+    var update_stack = new UpdateStack();
+    var thing = MakeNewThing(update_stack);
+    deepEqual(thing.pos, new Vector.Vector(1,2,3));
+    thing.update();
+    deepEqual(thing.pos, new Vector.Vector(1,2,3));
+    update_stack.logics.push(new TestUpdatable());
+    thing.update();
+    deepEqual(thing.pos, new Vector.Vector(2,2,3));
+    update_stack.logics.pop();
+    thing.update();
+    deepEqual(thing.pos, new Vector.Vector(2,2,3));
+})
+
 test("RouteFollower", function() {
     var thing = MakeNewThing(new RouteFollower([new Vector.Vector(1,0,3), new Vector.Vector(1,0,2)], 1));
     deepEqual(thing.pos, new Vector.Vector(1,2,3));

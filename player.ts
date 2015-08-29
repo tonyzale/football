@@ -1,6 +1,6 @@
 /// <reference path="game.ts" />
 
-class RouteFollower {
+class RouteFollower implements UpdateLogic {
     current_dest: number = 0;
     constructor(private route: Vector.Vector[], private speed: number) { }
     update(thing: Thing) {
@@ -22,7 +22,7 @@ class RouteFollower {
     }
 }
 
-class PlayerDrawer {
+class PlayerDrawer implements DrawLogic {
     constructor(public color: string){}
     draw(thing: Thing, canvas: HTMLCanvasElement, pixels_per_inch: number) {
         var context = canvas.getContext("2d");

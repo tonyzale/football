@@ -7,6 +7,18 @@ interface UpdateLogic {
     update(thing:Thing): void;
 }
 
+class DoNothingLogic implements UpdateLogic {
+    update(thing: Thing) {}
+}
+
+class UpdateStack implements UpdateLogic {
+    update(thing: Thing) {
+        this.logics[this.logics.length - 1].update(thing);
+    }
+    
+    logics: UpdateLogic[] = [new DoNothingLogic()]; 
+}
+
 interface DrawLogic {
     draw(thing: Thing, canvas: HTMLCanvasElement, pixels_per_inch: number): void;
 }

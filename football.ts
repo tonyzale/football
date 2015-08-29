@@ -2,7 +2,7 @@
 /// <reference path="player.ts" />
 
 // Draws a horizontally rendered field on HTMLCanvasElement with field's "Thing" locating its upper left.
-class FieldDrawer {
+class FieldDrawer implements DrawLogic {
     draw(thing: Thing, canvas: HTMLCanvasElement, pixels_per_inch: number) {
         var ctx = canvas.getContext("2d");
         ctx.fillStyle = "green";
