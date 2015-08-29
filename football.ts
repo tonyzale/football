@@ -27,20 +27,18 @@ class FieldDrawer {
     }
 }
 
-    // A +-+---------------+-+ C
-    //   |/|               |/|
-    //   |/|       M       |/|    M - middle of 50yd line
-    //   |/|               |/|
-    // B +-+---------------+-+ D
-    //
-    // POINT |   YARDS VEC   |   INCHES VEC
-    //   A   |   (0,0)       |    (0,0)
-    //   B   |   (0,53.33)   |    (0,1920)
-    //   C   |   (120,0)     |    (4320,0)
-    //   D   |   (120,53.33) |    (4320,1920)
-    //   M   |   (60, 26.67) |    (2160,960)    
-
-
+// A +-+---------------+-+ C
+//   |/|               |/|
+//   |/|       M       |/|    M - middle of 50yd line
+//   |/|               |/|
+// B +-+---------------+-+ D
+//
+// POINT |   YARDS VEC   |   INCHES VEC
+//   A   |   (0,0)       |    (0,0)
+//   B   |   (0,53.33)   |    (0,1920)
+//   C   |   (120,0)     |    (4320,0)
+//   D   |   (120,53.33) |    (4320,1920)
+//   M   |   (60, 26.67) |    (2160,960)    
 function YardsToInches(yards: number): number {
     return yards * 36;
 }
@@ -54,7 +52,7 @@ function YardsVecToInches(pos: Vector.Vector): Vector.Vector {
 class Game {
     constructor(private canvas: HTMLCanvasElement){
         this.pixels_per_inch = canvas.width / (120 * 3 * 12);
-        this.player_size = 30;
+        this.player_size = 18;
         this.scene.things.push(new Thing(new Vector.Vector(0,0,0), Things.Field,null,null,new FieldDrawer()));
         this.scene.things.push(new Thing(
             YardsVecToInches(new Vector.Vector(10,1,0)), Things.Player, this.player_size,
