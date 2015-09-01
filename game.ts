@@ -4,19 +4,30 @@
 enum Things {Player, Field, Ball};
 
 interface UpdateLogic {
-    update(thing:Thing): void;
+    update(thing:Thing, delta: number): void;
 }
 
 class DoNothingLogic implements UpdateLogic {
-    update(thing: Thing) {}
+    update(thing: Thing, delta: number) {}
 }
 
 class UpdateStack implements UpdateLogic {
-    update(thing: Thing) {
-        this.logics[this.logics.length - 1].update(thing);
+    update(thing: Thing, delta: number) {
+        this.logics[this.logics.length - 1].update(thing, delta);
     }
     
     logics: UpdateLogic[] = [new DoNothingLogic()]; 
+}
+
+class ExpiringUpdateLogic {
+    constructor(public logic: UpdateLogic, public length: number, private stack: UpdateStack) {}
+    update(thing: Thing, delta: number) {
+        this.logic.update(thing, delta);
+        this.length -= delta;
+        if (this.length < 0) {
+            this.stack.logics.pop();
+        }
+    }
 }
 
 interface DrawLogic {
@@ -24,18 +35,19 @@ interface DrawLogic {
 }
 
 class Thing {
-    constructor(public pos: Vector.Vector, public type: Things, public radius?: number, private updatable?: UpdateLogic, private draw_logic?: DrawLogic){
+    constructor(public pos: Vector.Vector, public type: Things, public radius?: number, private draw_logic?: DrawLogic){
         this.pos_history.push(pos);
     }
     toString(): String {return Things[this.type] + ": " + this.pos;}
-    update() {
-        this.updatable && this.updatable.update(this);
+    update(delta: number) {
+        this.updatable.update(this, delta);
         this.pos_history.push(this.pos);
     }
     draw(canvas: HTMLCanvasElement, pixels_per_inch: number) { this.draw_logic && this.draw_logic.draw(this, canvas, pixels_per_inch);}
     possessions: Thing[] = [];
     isColliding(other: Thing): boolean { return false; }
     pos_history: CircularBuffer<Vector.Vector> = new CircularBuffer<Vector.Vector>(10);
+    updatable: UpdateStack = new UpdateStack();
 }
 
 class Collision {

@@ -5,7 +5,9 @@
 QUnit.module("scene and thing tests");
 
 function MakeNewThing(updatable?:UpdateLogic) : Thing {
-    return new Thing(new Vector.Vector(1,2,3), Things.Player, null, updatable);
+    var thing = new Thing(new Vector.Vector(1,2,3), Things.Player, null);
+    if (updatable) thing.updatable.logics.push(updatable);
+    return thing;
 }
  
 test("Player Debug Output", function () {
@@ -32,56 +34,70 @@ class TestUpdatable implements UpdateLogic {
 test("UpdateLogic", function() {
     var thing = MakeNewThing(new TestUpdatable());
     deepEqual(thing.pos, new Vector.Vector(1,2,3));
-    thing.update();
+    thing.update(1);
     deepEqual(thing.pos, new Vector.Vector(2,2,3));
-    thing.update();
+    thing.update(1);
     deepEqual(thing.pos, new Vector.Vector(3,2,3));
 })
 
 test("UpdateStack", function() {
-    var update_stack = new UpdateStack();
-    var thing = MakeNewThing(update_stack);
+    var thing = MakeNewThing(new TestUpdatable());
     deepEqual(thing.pos, new Vector.Vector(1,2,3));
-    thing.update();
+    thing.update(1);
+    deepEqual(thing.pos, new Vector.Vector(2,2,3));
+    thing.updatable.logics.push(new DoNothingLogic());
+    thing.update(1);
+    deepEqual(thing.pos, new Vector.Vector(2,2,3));
+    thing.updatable.logics.pop();
+    thing.update(1);
+    deepEqual(thing.pos, new Vector.Vector(3,2,3));
+})
+
+test("ExpiringUpdate", function() {
+    var thing = MakeNewThing();
     deepEqual(thing.pos, new Vector.Vector(1,2,3));
-    update_stack.logics.push(new TestUpdatable());
-    thing.update();
+    thing.update(1);
+    deepEqual(thing.pos, new Vector.Vector(1,2,3));
+    thing.updatable.logics.push(new ExpiringUpdateLogic(new TestUpdatable(), 2, thing.updatable));
+    thing.update(1);
     deepEqual(thing.pos, new Vector.Vector(2,2,3));
-    update_stack.logics.pop();
-    thing.update();
-    deepEqual(thing.pos, new Vector.Vector(2,2,3));
+    thing.update(1);
+    deepEqual(thing.pos, new Vector.Vector(3,2,3));
+    thing.update(1);
+    deepEqual(thing.pos, new Vector.Vector(3,2,3));
 })
 
 test("RouteFollower", function() {
     var thing = MakeNewThing(new RouteFollower([new Vector.Vector(1,0,3), new Vector.Vector(1,0,2)], 1));
     deepEqual(thing.pos, new Vector.Vector(1,2,3));
-    thing.update();
+    thing.update(1);
     deepEqual(thing.pos, new Vector.Vector(1,1,3));
-    thing.update();
+    thing.update(1);
     deepEqual(thing.pos, new Vector.Vector(1,0,3));
-    thing.update();
+    thing.update(1);
     deepEqual(thing.pos, new Vector.Vector(1,0,2));
 })
 
 test("SpeedOffsetRouteFollower", function() {
-    var thing =  new Thing(new Vector.Vector(1,2,3), Things.Player,null,
+    var thing =  new Thing(new Vector.Vector(1,2,3), Things.Player);
+    thing.updatable.logics.push(
         new RouteFollower([new Vector.Vector(1,0,3), new Vector.Vector(1,0,2)], 0.6));
     var history: Vector.Vector[] = [];
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,2,3)) < 0.01);
     history.push(thing.pos);
-    thing.update();
+    thing.update(1);
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,1.4,3)) < 0.01);
     history.push(thing.pos);
-    thing.update();
+    thing.update(1);
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0.8,3)) < 0.01);
     history.push(thing.pos);
-    thing.update();
+    thing.update(1);
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0.2,3)) < 0.01);
     history.push(thing.pos);
-    thing.update();
+    thing.update(1);
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0,2.6)) < 0.01);
     history.push(thing.pos);
-    thing.update();
+    thing.update(1);
     ok(Vector.Vector.dist(thing.pos, new Vector.Vector(1,0,2.0)) < 0.01);
     history.push(thing.pos);
     equal(thing.pos_history.buffer.length, 6);
