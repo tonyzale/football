@@ -35,8 +35,9 @@ interface DrawLogic {
 }
 
 class Thing {
-    constructor(public pos: Vector.Vector, public type: Things, public radius?: number, private draw_logic?: DrawLogic){
+    constructor(public pos: Vector.Vector, public type: Things, public radius?: number, private draw_logic?: DrawLogic, update_logic?: UpdateLogic){
         this.pos_history.push(pos);
+        if (update_logic) this.updatable.logics.push(update_logic);
     }
     toString(): String {return Things[this.type] + ": " + this.pos;}
     update(delta: number) {

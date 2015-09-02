@@ -53,24 +53,24 @@ class Game {
     constructor(private canvas: HTMLCanvasElement){
         this.pixels_per_inch = canvas.width / (120 * 3 * 12);
         this.player_size = 18;
-        this.scene.things.push(new Thing(new Vector.Vector(0,0,0), Things.Field,null,null,new FieldDrawer()));
+        this.scene.things.push(new Thing(new Vector.Vector(0,0,0), Things.Field,null,new FieldDrawer()));
         this.scene.things.push(new Thing(
             YardsVecToInches(new Vector.Vector(10,1,0)), Things.Player, this.player_size,
-            new RouteFollower(
+            new PlayerDrawer('red'), new RouteFollower(
                 [new Vector.Vector(50, 1, 0), new Vector.Vector(50, 20, 0),
                     new Vector.Vector(10, 20, 0)].map(v=>{return YardsVecToInches(v);}),
-                5), new PlayerDrawer('red')));
+                5)));
          var ball_carrier: Thing;
          this.scene.things.push(ball_carrier = new Thing(
             YardsVecToInches(new Vector.Vector(110,1,0)), Things.Player, this.player_size,
-            new RouteFollower(
+            new PlayerDrawer('blue'), new RouteFollower(
                 [new Vector.Vector(70, 1, 0), new Vector.Vector(70, 20, 0), new Vector.Vector(110, 20, 0)].map(v=>{return YardsVecToInches(v);}),
-                5), new PlayerDrawer('blue')));    
+                5)));    
          ball_carrier.possessions.push(new Thing(new Vector.Vector(0,0,0), Things.Ball))
-        window.setInterval(this.update, 16.666);
+        window.setInterval(this.update, this.update_interval);
     }
     update = () => { 
-        this.scene.things.forEach(t => t.update());
+        this.scene.things.forEach(t => t.update(this.update_interval));
         this.scene.things.forEach(t => t.draw(this.canvas, this.pixels_per_inch));
     }
     scene:Scene = new Scene();
@@ -78,9 +78,10 @@ class Game {
         var x: number = (<HTMLInputElement>document.getElementById("xpos")).valueAsNumber;
         var y: number = (<HTMLInputElement>document.getElementById("ypos")).valueAsNumber;
         this.scene.things.push(new Thing(
-            YardsVecToInches(new Vector.Vector(x,y,0)), Things.Player, this.player_size, null, new PlayerDrawer('red')));        
+            YardsVecToInches(new Vector.Vector(x,y,0)), Things.Player, this.player_size, new PlayerDrawer('red')));        
     }
 
     pixels_per_inch: number;
     player_size: number;
+    update_interval: number = 16.6666;
 }
