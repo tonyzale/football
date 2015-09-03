@@ -49,28 +49,48 @@ function YardsVecToInches(pos: Vector.Vector): Vector.Vector {
     return pos;
 }
 
+class AreaDrawLogic implements DrawLogic {
+    draw(thing: Thing, canvas: HTMLCanvasElement, pixels_per_inch: number): void {
+        var context = canvas.getContext("2d");
+        context.beginPath();
+        context.arc(thing.pos.x * pixels_per_inch, thing.pos.y * pixels_per_inch, thing.radius * pixels_per_inch, 0, 2 * Math.PI, false);
+        context.fillStyle = "rgba(255,165,0,0.7)";
+        context.fill();       
+    }
+}
+
+class BlockDrillLogic implements UpdateLogic {
+    constructor(private game: Game) {
+        this.blocker = game.addPlayer(YardsVecToInches(new Vector.Vector(50,26,0)), "blue");
+        this.defender = game.addPlayer(YardsVecToInches(new Vector.Vector(53, 26, 0)), "red");
+        this.goal = new Thing(YardsVecToInches(new Vector.Vector(48, 25, 0)), Things.Area, 12, new AreaDrawLogic());
+        game.scene.things.push(this.goal);
+        this.defender.updatable.logics.push(new ChaseLogic(this.goal, 1));
+    }
+    update(thing: Thing, delta: number) {
+        if (this.game.latest_collisions.some(c=>{return c.is_between_things(this.defender, this.goal);})) {
+                this.blocker.pos = YardsVecToInches(new Vector.Vector(50,26,0));
+                this.blocker.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.blocker.updatable));
+                this.defender.pos = YardsVecToInches(new Vector.Vector(53, 26, 0));
+                this.defender.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.defender.updatable));
+            }
+    }
+    blocker: Thing;
+    defender: Thing;
+    goal: Thing;
+}
+
 class Game {
     constructor(private canvas: HTMLCanvasElement){
         this.pixels_per_inch = canvas.width / (120 * 3 * 12);
         this.player_size = 18;
         this.scene.things.push(new Thing(new Vector.Vector(0,0,0), Things.Field,null,new FieldDrawer()));
-        this.scene.things.push(new Thing(
-            YardsVecToInches(new Vector.Vector(10,1,0)), Things.Player, this.player_size,
-            new PlayerDrawer('red'), new RouteFollower(
-                [new Vector.Vector(50, 1, 0), new Vector.Vector(50, 20, 0),
-                    new Vector.Vector(10, 20, 0)].map(v=>{return YardsVecToInches(v);}),
-                5)));
-         var ball_carrier: Thing;
-         this.scene.things.push(ball_carrier = new Thing(
-            YardsVecToInches(new Vector.Vector(110,1,0)), Things.Player, this.player_size,
-            new PlayerDrawer('blue'), new RouteFollower(
-                [new Vector.Vector(70, 1, 0), new Vector.Vector(70, 20, 0), new Vector.Vector(110, 20, 0)].map(v=>{return YardsVecToInches(v);}),
-                5)));    
-         ball_carrier.possessions.push(new Thing(new Vector.Vector(0,0,0), Things.Ball))
+        this.scene.things.push(new Thing(new Vector.Vector(0,0,0), Things.Manager, null, null, new BlockDrillLogic(this)));
         window.setInterval(this.update, this.update_interval);
     }
     update = () => { 
         this.scene.things.forEach(t => t.update(this.update_interval));
+        this.latest_collisions = this.scene.getCollisionPairs();
         this.scene.things.forEach(t => t.draw(this.canvas, this.pixels_per_inch));
     }
     scene:Scene = new Scene();
@@ -80,8 +100,14 @@ class Game {
         this.scene.things.push(new Thing(
             YardsVecToInches(new Vector.Vector(x,y,0)), Things.Player, this.player_size, new PlayerDrawer('red')));        
     }
+    addPlayer(pos: Vector.Vector, color: string) {
+        var player = new Thing(pos, Things.Player, this.player_size, new PlayerDrawer(color));
+        this.scene.things.push(player);
+        return player;
+    }
 
     pixels_per_inch: number;
     player_size: number;
-    update_interval: number = 16.6666;
+    update_interval: number = 0.0166666;
+    latest_collisions: Collision[] = [];
 }

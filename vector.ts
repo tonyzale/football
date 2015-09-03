@@ -22,6 +22,11 @@ module Vector {
                             v1.z * v2.x - v1.x * v2.z,
                             v1.x * v2.y - v1.y * v2.x);
         }
+        static set(v1: Vector, v2: Vector) {
+            v1.x = v2.x;
+            v1.y = v2.y;
+            v1.z = v2.z;
+        }
         toString(): String {
             return "(" + this.x + "," + this.y + "," + this.z + ")";
         }

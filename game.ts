@@ -1,7 +1,7 @@
 /// <reference path="vector.ts" />
 /// <reference path="circular_buffer.ts" />
 
-enum Things {Player, Field, Ball};
+enum Things {Player, Field, Ball, Area, Manager};
 
 interface UpdateLogic {
     update(thing:Thing, delta: number): void;
@@ -52,7 +52,12 @@ class Thing {
 }
 
 class Collision {
-    constructor(public thing1: Thing, public thing2: Thing){}
+    constructor(public thing1: Thing, public thing2: Thing){
+        if (thing1 == thing2) throw "self collision error";
+    }
+    is_between_things(t1: Thing, t2: Thing): boolean {
+        return ((this.thing1 == t1 || this.thing1 == t2) && (this.thing2 == t1 || this.thing2 == t2));
+    }
 }
 
 class Scene {
