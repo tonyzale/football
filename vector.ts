@@ -27,6 +27,11 @@ module Vector {
             v1.y = v2.y;
             v1.z = v2.z;
         }
+        static rot2d(rads: number, v: Vector) {
+            return new Vector(v.x * Math.cos(rads) - v.y * Math.sin(rads),
+                              v.x * Math.sin(rads) + v.y * Math.cos(rads),
+                              v.z);
+        }
         toString(): String {
             return "(" + this.x + "," + this.y + "," + this.z + ")";
         }

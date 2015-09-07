@@ -119,3 +119,17 @@ test("Collisions", function() {
     equal(collisions.filter(c => {return (c.thing1 == thing1 && c.thing2 == thing3);}).length, 1);
     equal(collisions.filter(c => {return (c.thing1 == thing2 && c.thing2 == thing3);}).length, 1);
 })
+
+test("rotate", function() {
+    var v = new Vector.Vector(1,0,0);
+    var v2 = Vector.Vector.rot2d(Math.PI, v);
+    ok(Vector.Vector.dist(v2, new Vector.Vector(-1,0,0)) < 0.01);
+    var v3 = Vector.Vector.rot2d(-Math.PI, v);
+    ok(Vector.Vector.dist(v3, new Vector.Vector(-1,0,0)) < 0.01);
+    var v4 = Vector.Vector.rot2d(Math.PI * 0.5, v);
+    ok(Vector.Vector.dist(v4, new Vector.Vector(0,1,0)) < 0.01);
+    var v5 = Vector.Vector.rot2d(-Math.PI * 0.5, v);
+    ok(Vector.Vector.dist(v5, new Vector.Vector(0,-1,0)) < 0.01);
+    var v6 = Vector.Vector.rot2d(Math.PI * 0.25, v);
+    ok(Vector.Vector.dist(v6, new Vector.Vector(0.707,0.707,0)) < 0.01);
+})
