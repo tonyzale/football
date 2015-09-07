@@ -62,19 +62,32 @@ class AreaDrawLogic implements DrawLogic {
 class BlockDrillLogic implements UpdateLogic {
     constructor(private game: Game) {
         this.blocker = game.addPlayer(YardsVecToInches(new Vector.Vector(50,26,0)), "blue");
+        this.blocker.behavior = "block";
         this.defender = game.addPlayer(YardsVecToInches(new Vector.Vector(53, 26, 0)), "red");
+        this.defender.behavior = "rush";
         this.goal = new Thing(YardsVecToInches(new Vector.Vector(48, 25, 0)), Things.Area, 12, new AreaDrawLogic());
         game.scene.things.push(this.goal);
         this.defender.updatable.logics.push(new ChaseLogic(this.goal, 1));
-    }
-    update(thing: Thing, delta: number) {
-        if (this.game.latest_collisions.some(c=>{return c.is_between_things(this.defender, this.goal);})) {
+        game.collison_resolvers.push((c: Collision) : boolean => {
+            if (!c.isBetweenThings(this.defender, this.goal)) { return false; }
+            if (c.continuous_time > 0.5) {
                 this.blocker.pos = YardsVecToInches(new Vector.Vector(50,26,0));
                 this.blocker.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.blocker.updatable));
                 this.defender.pos = YardsVecToInches(new Vector.Vector(53, 26, 0));
                 this.defender.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.defender.updatable));
             }
+            return true;
+        });
+        game.collison_resolvers.push((c: Collision) : boolean => {
+            if (!c.isBetweenBehaviors("block", "rush")) { return false; }
+                if (c.continuous_time < 1) {
+                    c.thing1.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing1.updatable));
+                    c.thing2.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing2.updatable));
+                }
+                return true;
+        });
     }
+    update(thing: Thing, delta: number) {}
     blocker: Thing;
     defender: Thing;
     goal: Thing;
@@ -90,8 +103,27 @@ class Game {
     }
     update = () => { 
         this.scene.things.forEach(t => t.update(this.update_interval));
-        this.latest_collisions = this.scene.getCollisionPairs();
+        this.updateCollisions();
         this.scene.things.forEach(t => t.draw(this.canvas, this.pixels_per_inch));
+    }
+    updateCollisions() {
+        var old_collisions = this.latest_collisions;
+        this.latest_collisions = this.scene.getCollisionPairs();
+        this.latest_collisions.forEach(c=>{
+           var old_matches = old_collisions.filter(old_c=>{return old_c.isSameCollision(c);});
+           if (old_matches.length > 1) throw "duplicate collisions!";
+           if (old_matches.length == 1) {
+               c.continuous_time = old_matches[0].continuous_time + this.update_interval;
+           }
+           this.resolveCollision(c);
+        });
+           
+    }
+    resolveCollision(c: Collision) {
+        for (var i = 0; i < this.collison_resolvers.length; ++i) {
+            if (this.collison_resolvers[i](c)) { return; }
+        }
+        throw "unhandled collision";
     }
     scene:Scene = new Scene();
     newPlayer() {
@@ -110,4 +142,5 @@ class Game {
     player_size: number;
     update_interval: number = 0.0166666;
     latest_collisions: Collision[] = [];
+    collison_resolvers: {(c: Collision): boolean}[] = [];
 }

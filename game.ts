@@ -24,7 +24,7 @@ class ExpiringUpdateLogic {
     update(thing: Thing, delta: number) {
         this.logic.update(thing, delta);
         this.length -= delta;
-        if (this.length < 0) {
+        if (this.length <= 0) {
             this.stack.logics.pop();
         }
     }
@@ -49,15 +49,24 @@ class Thing {
     isColliding(other: Thing): boolean { return false; }
     pos_history: CircularBuffer<Vector.Vector> = new CircularBuffer<Vector.Vector>(10);
     updatable: UpdateStack = new UpdateStack();
+    behavior: string;
 }
 
 class Collision {
     constructor(public thing1: Thing, public thing2: Thing){
         if (thing1 == thing2) throw "self collision error";
     }
-    is_between_things(t1: Thing, t2: Thing): boolean {
+    isBetweenThings(t1: Thing, t2: Thing): boolean {
         return ((this.thing1 == t1 || this.thing1 == t2) && (this.thing2 == t1 || this.thing2 == t2));
     }
+    isSameCollision(c: Collision): boolean {
+        return this.isBetweenThings(c.thing1, c.thing2);
+    }
+    isBetweenBehaviors(b1: string, b2: string) {
+        return ((this.thing1.behavior == b1 && this.thing2.behavior == b2) ||
+            (this.thing1.behavior == b2 && this.thing2.behavior == b1));
+    }
+    continuous_time: number = 0;
 }
 
 class Scene {
