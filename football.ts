@@ -1,5 +1,6 @@
 /// <reference path="game.ts" />
 /// <reference path="player.ts" />
+/// <reference path="rand.ts" />
 
 // Draws a horizontally rendered field on HTMLCanvasElement with field's "Thing" locating its upper left.
 class FieldDrawer implements DrawLogic {
@@ -71,10 +72,7 @@ class BlockDrillLogic implements UpdateLogic {
         game.collison_resolvers.push((c: Collision) : boolean => {
             if (!c.isBetweenThings(this.defender, this.goal)) { return false; }
             if (c.continuous_time > 0.5) {
-                this.blocker.pos = YardsVecToInches(new Vector.Vector(50,26,0));
-                this.blocker.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.blocker.updatable));
-                this.defender.pos = YardsVecToInches(new Vector.Vector(53, 26, 0));
-                this.defender.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.defender.updatable));
+                this.resetDrill();
             }
             return true;
         });
@@ -95,15 +93,17 @@ class BlockDrillLogic implements UpdateLogic {
                     if (roll < 0.1) {
                         var push_dir = Vector.Vector.norm(Vector.Vector.minus(defender.pos, blocker.pos));
                         var push_pos = Vector.Vector.plus(defender.pos, Vector.Vector.times(36, push_dir));
-                        defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1), defender.updatable));
+                        var speed_randomization = Math.random() * 0.2
+                        defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1 + speed_randomization), defender.updatable));
                         push_pos = Vector.Vector.plus(blocker.pos, Vector.Vector.times(10, push_dir));
-                        blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7), blocker.updatable));
+                        blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7 + speed_randomization), blocker.updatable));
                     } else if (roll < 0.2) {
                         var push_dir = Vector.Vector.norm(Vector.Vector.minus(blocker.pos, defender.pos));
                         var push_pos = Vector.Vector.plus(blocker.pos, Vector.Vector.times(36, push_dir));
-                        blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1), blocker.updatable));  
+                        var speed_randomization = Math.random() * 0.2
+                        blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1 + speed_randomization), blocker.updatable));  
                         push_pos = Vector.Vector.plus(defender.pos, Vector.Vector.times(10, push_dir));
-                        defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7), defender.updatable));                      
+                        defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7 + speed_randomization), defender.updatable));                      
                     } else {
                         c.thing1.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing1.updatable));
                         c.thing2.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing2.updatable));                        
@@ -111,6 +111,13 @@ class BlockDrillLogic implements UpdateLogic {
                 }
                 return true;
         });
+    }
+    resetDrill() {
+        this.blocker.pos = YardsVecToInches(new Vector.Vector(normal_random(50),normal_random(26),0));
+        this.blocker.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.blocker.updatable));
+        this.defender.pos = YardsVecToInches(new Vector.Vector(normal_random(53), normal_random(26), 0));
+        this.defender.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.defender.updatable));
+        
     }
     update(thing: Thing, delta: number) {}
     blocker: Thing;
