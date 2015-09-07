@@ -2,7 +2,7 @@
 
 class RouteFollower implements UpdateLogic {
     current_dest: number = 0;
-    constructor(private route: Vector.Vector[], private speed: number) { }
+    constructor(public route: Vector.Vector[], private speed: number) { }
     update(thing: Thing, delta: number) {
         var dist_to_travel: number = this.speed;
         while (dist_to_travel > 0 && (this.current_dest < this.route.length)) {
@@ -18,6 +18,16 @@ class RouteFollower implements UpdateLogic {
                 this.current_dest += 1;
                 dist_to_travel -= dist_to_next_waypoint;
             }
+        }
+    }
+}
+
+class ExpireOnArrivalLogic {
+    constructor(public logic: RouteFollower, private stack: UpdateStack) {}
+    update(thing: Thing, delta: number) {
+        this.logic.update(thing, delta);
+        if (this.logic.current_dest == this.logic.route.length) {
+            this.stack.logics.pop();
         }
     }
 }

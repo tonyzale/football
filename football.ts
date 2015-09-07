@@ -64,7 +64,7 @@ class BlockDrillLogic implements UpdateLogic {
         this.blocker = game.addPlayer(YardsVecToInches(new Vector.Vector(50,26,0)), "blue");
         this.blocker.behavior = "block";
         this.defender = game.addPlayer(YardsVecToInches(new Vector.Vector(53, 26, 0)), "red");
-        this.defender.behavior = "rush";
+        this.defender.behavior = "defend";
         this.goal = new Thing(YardsVecToInches(new Vector.Vector(48, 25, 0)), Things.Area, 12, new AreaDrawLogic());
         game.scene.things.push(this.goal);
         this.defender.updatable.logics.push(new ChaseLogic(this.goal, 1));
@@ -79,10 +79,35 @@ class BlockDrillLogic implements UpdateLogic {
             return true;
         });
         game.collison_resolvers.push((c: Collision) : boolean => {
-            if (!c.isBetweenBehaviors("block", "rush")) { return false; }
-                if (c.continuous_time < 1) {
+            if (!c.isBetweenBehaviors("block", "defend")) { return false; }
+                if (c.thing1.behavior == "defend") {
+                    var defender = c.thing1;
+                    var blocker = c.thing2;
+                } else {
+                    var defender = c.thing2;
+                    var blocker = c.thing1;
+                }
+                if (c.continuous_time < 0.3) {
                     c.thing1.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing1.updatable));
                     c.thing2.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing2.updatable));
+                } else {
+                    var roll = Math.random();
+                    if (roll < 0.1) {
+                        var push_dir = Vector.Vector.norm(Vector.Vector.minus(defender.pos, blocker.pos));
+                        var push_pos = Vector.Vector.plus(defender.pos, Vector.Vector.times(36, push_dir));
+                        defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1), defender.updatable));
+                        push_pos = Vector.Vector.plus(blocker.pos, Vector.Vector.times(10, push_dir));
+                        blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7), blocker.updatable));
+                    } else if (roll < 0.2) {
+                        var push_dir = Vector.Vector.norm(Vector.Vector.minus(blocker.pos, defender.pos));
+                        var push_pos = Vector.Vector.plus(blocker.pos, Vector.Vector.times(36, push_dir));
+                        blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1), blocker.updatable));  
+                        push_pos = Vector.Vector.plus(defender.pos, Vector.Vector.times(10, push_dir));
+                        defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7), defender.updatable));                      
+                    } else {
+                        c.thing1.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing1.updatable));
+                        c.thing2.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing2.updatable));                        
+                    }
                 }
                 return true;
         });
