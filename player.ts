@@ -47,6 +47,22 @@ class ChaseLogic implements UpdateLogic {
     }
 }
 
+class ChaseDynamicLogic implements UpdateLogic {
+    constructor(private target: ()=>Vector.Vector, private speed: number) {}
+    update(thing: Thing, delta: number) {
+        var target = this.target();
+        var diff = Vector.Vector.minus(target, thing.pos);
+        var dist_to_target = Vector.Vector.mag(diff);
+        if (dist_to_target < this.speed) {
+            Vector.Vector.set(thing.pos, target);
+            return;
+        }
+        var normalized = Vector.Vector.norm(diff);
+        var dist = Vector.Vector.times(this.speed, normalized);
+        thing.pos = Vector.Vector.plus(thing.pos, dist);        
+    }
+}
+
 class PlayerDrawer implements DrawLogic {
     constructor(public color: string){}
     draw(thing: Thing, canvas: HTMLCanvasElement, pixels_per_inch: number) {

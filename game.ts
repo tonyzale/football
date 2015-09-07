@@ -15,6 +15,9 @@ class UpdateStack implements UpdateLogic {
     update(thing: Thing, delta: number) {
         this.logics[this.logics.length - 1].update(thing, delta);
     }
+    reset() {
+        this.logics = this.logics.slice(0,1);
+    }
     
     logics: UpdateLogic[] = [new DoNothingLogic()]; 
 }

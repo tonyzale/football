@@ -69,6 +69,11 @@ class BlockDrillLogic implements UpdateLogic {
         this.goal = new Thing(YardsVecToInches(new Vector.Vector(48, 25, 0)), Things.Area, 12, new AreaDrawLogic());
         game.scene.things.push(this.goal);
         this.defender.updatable.logics.push(new ChaseLogic(this.goal, 1));
+        this.blocker.updatable.logics.push(new ChaseDynamicLogic((): Vector.Vector => {
+            if (Vector.Vector.dist_sqrd(this.blocker.pos, this.goal.pos) < Vector.Vector.dist_sqrd(this.blocker.pos, this.defender.pos))
+                return Vector.Vector.times(0.5, Vector.Vector.plus(this.goal.pos, this.defender.pos));
+            return this.blocker.pos;
+        }, 0.5));
         game.collison_resolvers.push((c: Collision) : boolean => {
             if (!c.isBetweenThings(this.defender, this.goal)) { return false; }
             if (c.continuous_time > 0.5) {
@@ -93,14 +98,14 @@ class BlockDrillLogic implements UpdateLogic {
                     if (roll < 0.1) {
                         var push_dir = Vector.Vector.norm(Vector.Vector.minus(defender.pos, blocker.pos));
                         var push_pos = Vector.Vector.plus(defender.pos, Vector.Vector.times(36, push_dir));
-                        var speed_randomization = Math.random() * 0.2
+                        var speed_randomization = Math.random() * 0.2;
                         defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1 + speed_randomization), defender.updatable));
                         push_pos = Vector.Vector.plus(blocker.pos, Vector.Vector.times(10, push_dir));
                         blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7 + speed_randomization), blocker.updatable));
                     } else if (roll < 0.2) {
                         var push_dir = Vector.Vector.norm(Vector.Vector.minus(blocker.pos, defender.pos));
                         var push_pos = Vector.Vector.plus(blocker.pos, Vector.Vector.times(36, push_dir));
-                        var speed_randomization = Math.random() * 0.2
+                        var speed_randomization = Math.random() * 0.2;
                         blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1 + speed_randomization), blocker.updatable));  
                         push_pos = Vector.Vector.plus(defender.pos, Vector.Vector.times(10, push_dir));
                         defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7 + speed_randomization), defender.updatable));                      
@@ -114,10 +119,18 @@ class BlockDrillLogic implements UpdateLogic {
     }
     resetDrill() {
         this.blocker.pos = YardsVecToInches(new Vector.Vector(normal_random(50),normal_random(26),0));
-        this.blocker.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.blocker.updatable));
+        this.blocker.updatable.reset();
         this.defender.pos = YardsVecToInches(new Vector.Vector(normal_random(53), normal_random(26), 0));
+        this.defender.updatable.reset();
+        this.defender.updatable.logics.push(new ChaseLogic(this.goal, 1));
+        this.blocker.updatable.logics.push(new ChaseDynamicLogic((): Vector.Vector => {
+            if (Vector.Vector.dist_sqrd(this.blocker.pos, this.goal.pos) < Vector.Vector.dist_sqrd(this.blocker.pos, this.defender.pos))
+                return Vector.Vector.times(0.5, Vector.Vector.plus(this.goal.pos, this.defender.pos));
+            return this.blocker.pos;
+        }, 0.5));
+        // do nothing for 1s before start
+        this.blocker.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.blocker.updatable));
         this.defender.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.defender.updatable));
-        
     }
     update(thing: Thing, delta: number) {}
     blocker: Thing;
@@ -155,7 +168,6 @@ class Game {
         for (var i = 0; i < this.collison_resolvers.length; ++i) {
             if (this.collison_resolvers[i](c)) { return; }
         }
-        throw "unhandled collision";
     }
     scene:Scene = new Scene();
     newPlayer() {
