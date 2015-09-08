@@ -20,9 +20,10 @@ class RouteFollower implements UpdateLogic {
             }
         }
     }
+    toString(): string { return "RouteFollowerLogic"; }
 }
 
-class ExpireOnArrivalLogic {
+class ExpireOnArrivalLogic implements UpdateLogic {
     constructor(public logic: RouteFollower, private stack: UpdateStack) {}
     update(thing: Thing, delta: number) {
         this.logic.update(thing, delta);
@@ -30,6 +31,7 @@ class ExpireOnArrivalLogic {
             this.stack.logics.pop();
         }
     }
+    toString(): string { return "ExpireOnArrivalLogic " + this.logic.route; }
 }
 
 class ChaseLogic implements UpdateLogic {
@@ -45,6 +47,7 @@ class ChaseLogic implements UpdateLogic {
         var dist = Vector.Vector.times(this.speed, normalized);
         thing.pos = Vector.Vector.plus(thing.pos, dist);
     }
+    toString(): string { return "ChaseLogic"; }
 }
 
 class ChaseDynamicLogic implements UpdateLogic {
@@ -61,6 +64,7 @@ class ChaseDynamicLogic implements UpdateLogic {
         var dist = Vector.Vector.times(this.speed, normalized);
         thing.pos = Vector.Vector.plus(thing.pos, dist);        
     }
+    toString(): string { return "ChaseDynamicLogic"; }
 }
 
 class PlayerDrawer implements DrawLogic {

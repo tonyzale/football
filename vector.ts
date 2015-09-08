@@ -33,7 +33,7 @@ module Vector {
                               v.z);
         }
         toString(): String {
-            return "(" + this.x + "," + this.y + "," + this.z + ")";
+            return "(" + this.x.toFixed(1) + "," + this.y.toFixed(1) + "," + this.z.toFixed(1) + ")";
         }
     }
 }

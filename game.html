@@ -8,18 +8,31 @@
   <script src="game.js"></script>
   <script src="player.js"></script>
   <script src="rand.js"></script>
+  <script src="../node_modules/angular/angular.js"></script>
 </head>
 <body>
 	<canvas id="field" width=1200 height=533></canvas>
 	<script src="football.js"></script>
-	<script>
-    var g = new Game(document.getElementById("field"));
-  </script>
+  <div ng-app="footballApp">
+    <div ng-controller="FootballCtrl">
+      <ul>
+        <li ng-repeat="thing in game.players()">
+          <span>{{thing.behavior + " " + thing.pos}}</span>
+          <ul>
+            <li ng-repeat="logic in thing.updatable.logics">
+              <span>{{"" + logic}}</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
   <div>
     Add Player
     <input type="number" name="x" id="xpos" value=0></input>
     <input type="number" name="y" id="ypos" value=0></input>
     <button onclick="g.newPlayer()">Add Player</button>
   </div>
+  <script src="angular_football.js"></script>
 </body>
 </html>

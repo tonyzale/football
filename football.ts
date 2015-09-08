@@ -181,7 +181,9 @@ class Game {
         this.scene.things.push(player);
         return player;
     }
-
+    players() {
+        return this.scene.things.filter(t => {return t.type == Things.Player;})
+    }
     pixels_per_inch: number;
     player_size: number;
     update_interval: number = 0.0166666;

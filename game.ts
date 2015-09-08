@@ -9,6 +9,7 @@ interface UpdateLogic {
 
 class DoNothingLogic implements UpdateLogic {
     update(thing: Thing, delta: number) {}
+    toString(): string { return "DoNothingLogic"; }
 }
 
 class UpdateStack implements UpdateLogic {
@@ -31,6 +32,7 @@ class ExpiringUpdateLogic {
             this.stack.logics.pop();
         }
     }
+    toString(): string { return "ExpiringUpdateLogic - " + this.logic; }
 }
 
 interface DrawLogic {

@@ -25,7 +25,7 @@
 			"taskName": "Build",
 			"isBuildCommand": true,
 			// args is the HelloWorld program to compile.
-			"args": ["football.ts"],
+			"args": ["football.ts", "angular_football.ts"],
 				
 			// use the standard tsc problem matcher to find compile problems
 			// in the output.
