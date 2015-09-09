@@ -22,7 +22,7 @@
     <div ng-controller="FootballCtrl">
       <ul id="debug">
         <li ng-repeat="thing in game.players">
-          <span>{{thing.behavior + " " + thing.pos}}</span>
+          <span>{{thing.name + " " + thing.behavior + " " + thing.pos}}</span>
           <ul>
             <li ng-repeat="logic in thing.updatable.logics">
               <span>{{"" + logic}}</span>

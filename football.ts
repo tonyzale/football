@@ -62,18 +62,11 @@ class AreaDrawLogic implements DrawLogic {
 
 class BlockDrillLogic implements UpdateLogic {
     constructor(private game: Game) {
-        this.blocker = game.addPlayer(YardsVecToInches(new Vector.Vector(50,26,0)), "blue");
-        this.blocker.behavior = "block";
-        this.defender = game.addPlayer(YardsVecToInches(new Vector.Vector(53, 26, 0)), "red");
-        this.defender.behavior = "defend";
-        this.goal = new Thing(YardsVecToInches(new Vector.Vector(48, 25, 0)), Things.Area, 12, new AreaDrawLogic());
+        this.blocker = game.addPlayer("blocker", YardsVecToInches(new Vector.Vector(50,26,0)), "blue");
+        this.defender = game.addPlayer("defender", YardsVecToInches(new Vector.Vector(53, 26, 0)), "red");
+        this.goal = new Thing("goal", YardsVecToInches(new Vector.Vector(48, 25, 0)), Things.Area, 12, new AreaDrawLogic());
         game.scene.things.push(this.goal);
-        this.defender.updatable.logics.push(new ChaseLogic(this.goal, 1));
-        this.blocker.updatable.logics.push(new ChaseDynamicLogic((): Vector.Vector => {
-            if (Vector.Vector.dist_sqrd(this.blocker.pos, this.goal.pos) < Vector.Vector.dist_sqrd(this.blocker.pos, this.defender.pos))
-                return Vector.Vector.times(0.5, Vector.Vector.plus(this.goal.pos, this.defender.pos));
-            return this.blocker.pos;
-        }, 0.5));
+        this.resetDrill();
         game.collison_resolvers.push((c: Collision) : boolean => {
             if (!c.isBetweenThings(this.defender, this.goal)) { return false; }
             if (c.continuous_time > 0.5) {
@@ -99,15 +92,19 @@ class BlockDrillLogic implements UpdateLogic {
                         var push_dir = Vector.Vector.norm(Vector.Vector.minus(defender.pos, blocker.pos));
                         var push_pos = Vector.Vector.plus(defender.pos, Vector.Vector.times(36, push_dir));
                         var speed_randomization = Math.random() * 0.2;
+                        defender.behavior = "stumble";
                         defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1 + speed_randomization), defender.updatable));
                         push_pos = Vector.Vector.plus(blocker.pos, Vector.Vector.times(10, push_dir));
+                        blocker.behavior = "push";
                         blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7 + speed_randomization), blocker.updatable));
                     } else if (roll < 0.2) {
                         var push_dir = Vector.Vector.norm(Vector.Vector.minus(blocker.pos, defender.pos));
                         var push_pos = Vector.Vector.plus(blocker.pos, Vector.Vector.times(36, push_dir));
                         var speed_randomization = Math.random() * 0.2;
+                        blocker.behavior = "stumble";
                         blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1 + speed_randomization), blocker.updatable));  
                         push_pos = Vector.Vector.plus(defender.pos, Vector.Vector.times(10, push_dir));
+                        defender.behavior = "push";
                         defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7 + speed_randomization), defender.updatable));                      
                     } else {
                         c.thing1.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing1.updatable));
@@ -120,14 +117,19 @@ class BlockDrillLogic implements UpdateLogic {
     resetDrill() {
         this.blocker.pos = YardsVecToInches(new Vector.Vector(normal_random(50),normal_random(26),0));
         this.blocker.updatable.reset();
+        this.blocker.behavior = "block";
         this.defender.pos = YardsVecToInches(new Vector.Vector(normal_random(53), normal_random(26), 0));
         this.defender.updatable.reset();
-        this.defender.updatable.logics.push(new ChaseLogic(this.goal, 1));
+        this.defender.behavior = "defend";
+        this.defender.updatable.logics.push(new ChaseLogic(this.goal, 1, "defend"));
         this.blocker.updatable.logics.push(new ChaseDynamicLogic((): Vector.Vector => {
-            if (Vector.Vector.dist_sqrd(this.blocker.pos, this.goal.pos) < Vector.Vector.dist_sqrd(this.blocker.pos, this.defender.pos))
+            var blocker_to_goal_dist = Vector.Vector.dist_sqrd(this.blocker.pos, this.goal.pos);
+            var defender_to_goal_dist = Vector.Vector.dist_sqrd(this.defender.pos, this.goal.pos);
+            var blocker_to_defender_dist = Vector.Vector.dist_sqrd(this.blocker.pos, this.defender.pos);
+            if (blocker_to_goal_dist < blocker_to_defender_dist || blocker_to_goal_dist > defender_to_goal_dist)
                 return Vector.Vector.times(0.5, Vector.Vector.plus(this.goal.pos, this.defender.pos));
             return this.blocker.pos;
-        }, 0.5));
+        }, 0.5, "block"));
         // do nothing for 1s before start
         this.blocker.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.blocker.updatable));
         this.defender.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), 1, this.defender.updatable));
@@ -142,8 +144,8 @@ class Game {
     constructor(private canvas: HTMLCanvasElement){
         this.pixels_per_inch = canvas.width / (120 * 3 * 12);
         this.player_size = 18;
-        this.scene.things.push(new Thing(new Vector.Vector(0,0,0), Things.Field,null,new FieldDrawer()));
-        this.scene.things.push(new Thing(new Vector.Vector(0,0,0), Things.Manager, null, null, new BlockDrillLogic(this)));
+        this.scene.things.push(new Thing("field", new Vector.Vector(0,0,0), Things.Field,null,new FieldDrawer()));
+        this.scene.things.push(new Thing("block drill logic", new Vector.Vector(0,0,0), Things.Manager, null, null, new BlockDrillLogic(this)));
         window.setInterval(this.update, this.update_interval);
     }
     update = () => { 
@@ -170,14 +172,8 @@ class Game {
         }
     }
     scene:Scene = new Scene();
-    newPlayer() {
-        var x: number = (<HTMLInputElement>document.getElementById("xpos")).valueAsNumber;
-        var y: number = (<HTMLInputElement>document.getElementById("ypos")).valueAsNumber;
-        this.scene.things.push(new Thing(
-            YardsVecToInches(new Vector.Vector(x,y,0)), Things.Player, this.player_size, new PlayerDrawer('red')));        
-    }
-    addPlayer(pos: Vector.Vector, color: string) {
-        var player = new Thing(pos, Things.Player, this.player_size, new PlayerDrawer(color));
+    addPlayer(name: string, pos: Vector.Vector, color: string): Thing {
+        var player = new Thing(name, pos, Things.Player, this.player_size, new PlayerDrawer(color));
         this.scene.things.push(player);
         this.players.push(player);
         return player;

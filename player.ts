@@ -35,8 +35,9 @@ class ExpireOnArrivalLogic implements UpdateLogic {
 }
 
 class ChaseLogic implements UpdateLogic {
-    constructor(private target: Thing, private speed: number) {}
+    constructor(private target: Thing, private speed: number, private behavior?: string) {}
     update(thing: Thing, delta: number) {
+        if (this.behavior) { thing.behavior = this.behavior; }
         var diff = Vector.Vector.minus(this.target.pos, thing.pos);
         var dist_to_target = Vector.Vector.mag(diff);
         if (dist_to_target < this.speed) {
@@ -51,8 +52,9 @@ class ChaseLogic implements UpdateLogic {
 }
 
 class ChaseDynamicLogic implements UpdateLogic {
-    constructor(private target: ()=>Vector.Vector, private speed: number) {}
+    constructor(private target: ()=>Vector.Vector, private speed: number, private behavior?: string) {}
     update(thing: Thing, delta: number) {
+        if (this.behavior) { thing.behavior = this.behavior; }
         var target = this.target();
         var diff = Vector.Vector.minus(target, thing.pos);
         var dist_to_target = Vector.Vector.mag(diff);
