@@ -8,15 +8,20 @@
   <script src="game.js"></script>
   <script src="player.js"></script>
   <script src="rand.js"></script>
-  <script src="../node_modules/angular/angular.js"></script>
+  <script src="../node_modules/angular/angular.min.js"></script>
+  <style>
+    ul#debug li {
+        display:inline;
+    }
+</style>
 </head>
 <body>
 	<canvas id="field" width=1200 height=533></canvas>
 	<script src="football.js"></script>
   <div ng-app="footballApp">
     <div ng-controller="FootballCtrl">
-      <ul>
-        <li ng-repeat="thing in game.players()">
+      <ul id="debug">
+        <li ng-repeat="thing in game.players">
           <span>{{thing.behavior + " " + thing.pos}}</span>
           <ul>
             <li ng-repeat="logic in thing.updatable.logics">

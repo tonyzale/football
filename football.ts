@@ -179,14 +179,13 @@ class Game {
     addPlayer(pos: Vector.Vector, color: string) {
         var player = new Thing(pos, Things.Player, this.player_size, new PlayerDrawer(color));
         this.scene.things.push(player);
+        this.players.push(player);
         return player;
-    }
-    players() {
-        return this.scene.things.filter(t => {return t.type == Things.Player;})
     }
     pixels_per_inch: number;
     player_size: number;
     update_interval: number = 0.0166666;
     latest_collisions: Collision[] = [];
     collison_resolvers: {(c: Collision): boolean}[] = [];
+    players: Thing[] = [];
 }
