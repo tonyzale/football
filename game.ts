@@ -53,6 +53,10 @@ class Thing {
     possessions: Thing[] = [];
     isColliding(other: Thing): boolean { return false; }
     pos_history: CircularBuffer<Vector.Vector> = new CircularBuffer<Vector.Vector>(10);
+    move_dir(): Vector.Vector {
+        return Vector.Vector.norm(
+            Vector.Vector.minus(this.pos_history.buffer[this.pos_history.buffer.length - 1], this.pos_history.buffer[this.pos_history.buffer.length - 2]));
+    }
     updatable: UpdateStack = new UpdateStack();
     behavior: string;
 }
