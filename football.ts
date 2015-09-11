@@ -74,47 +74,47 @@ class BlockDrillLogic implements UpdateLogic {
             }
             return true;
         });
-        game.collison_resolvers.push((c: Collision) : boolean => {
+        game.collison_resolvers.push((c: Collision): boolean => {
             if (!c.isBetweenBehaviors("block", "defend")) { return false; }
-                if (c.thing1.behavior == "defend") {
-                    var defender = c.thing1;
-                    var blocker = c.thing2;
+            if (c.thing1.behavior == "defend") {
+                var defender = c.thing1;
+                var blocker = c.thing2;
+            } else {
+                var defender = c.thing2;
+                var blocker = c.thing1;
+            }
+            var blocker_moving_dir = blocker.move_dir();
+            var defender_moving_dir = defender.move_dir();
+            var pusher_to_pushee = Vector.Vector.norm(Vector.Vector.minus(defender.pos, blocker.pos));
+            if (Vector.Vector.dot(blocker_moving_dir, pusher_to_pushee) < 0 ||
+                Vector.Vector.dot(pusher_to_pushee, defender_moving_dir) > 0) {
+                return false;
+            }
+            if (c.continuous_time < 0.3) {
+                c.thing1.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing1.updatable));
+                c.thing2.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing2.updatable));
+            } else {
+                function push(pusher: Thing, pushee: Thing) {
+                    var push_dir = Vector.Vector.norm(Vector.Vector.minus(pushee.pos, pusher.pos));
+                    var push_pos = Vector.Vector.plus(pushee.pos, Vector.Vector.times(36, push_dir));
+                    var stumble_speed = normal_random(1.1, 0.1);
+                    pushee.behavior = "stumble";
+                    pushee.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], stumble_speed), pushee.updatable));
+                    push_pos = Vector.Vector.plus(pusher.pos, Vector.Vector.times(10, push_dir));
+                    pusher.behavior = "push";
+                    pusher.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], Math.max(0, stumble_speed - 0.2)), pusher.updatable));
+                }
+                var roll = Math.random();
+                if (roll < 0.1) {
+                    push(blocker, defender);
+                } else if (roll < 0.2) {
+                    push(defender, blocker);
                 } else {
-                    var defender = c.thing2;
-                    var blocker = c.thing1;
-                }
-                var blocker_moving_dir = blocker.move_dir();
-                var defender_moving_dir = defender.move_dir();
-                var pusher_to_pushee = Vector.Vector.norm(Vector.Vector.minus(defender.pos, blocker.pos));
-                if (Vector.Vector.dot(blocker_moving_dir, pusher_to_pushee) < 0 ||
-                    Vector.Vector.dot(pusher_to_pushee, defender_moving_dir) > 0) {
-                    return false;
-                }
-                if (c.continuous_time < 0.3) {
                     c.thing1.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing1.updatable));
                     c.thing2.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing2.updatable));
-                } else {
-                    function push(pusher: Thing, pushee: Thing) {
-                        var push_dir = Vector.Vector.norm(Vector.Vector.minus(pushee.pos, pusher.pos));
-                        var push_pos = Vector.Vector.plus(pushee.pos, Vector.Vector.times(36, push_dir));
-                        var stumble_speed = normal_random(1.1, 0.1);
-                        pushee.behavior = "stumble";
-                        pushee.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], stumble_speed), pushee.updatable));
-                        push_pos = Vector.Vector.plus(pusher.pos, Vector.Vector.times(10, push_dir));
-                        pusher.behavior = "push";
-                        pusher.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], Math.max(0, stumble_speed - 0.2)), pusher.updatable));
-                    }
-                    var roll = Math.random();
-                    if (roll < 0.1) {
-                        push(blocker, defender);
-                    } else if (roll < 0.2) {
-                        push(defender, blocker);                      
-                    } else {
-                        c.thing1.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing1.updatable));
-                        c.thing2.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing2.updatable));                        
-                    }
                 }
-                return true;
+            }
+            return true;
         });
     }
     resetDrill() {
