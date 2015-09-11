@@ -87,25 +87,21 @@ class BlockDrillLogic implements UpdateLogic {
                     c.thing1.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing1.updatable));
                     c.thing2.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing2.updatable));
                 } else {
+                    function push(pusher: Thing, pushee: Thing) {
+                        var push_dir = Vector.Vector.norm(Vector.Vector.minus(pushee.pos, pusher.pos));
+                        var push_pos = Vector.Vector.plus(pushee.pos, Vector.Vector.times(36, push_dir));
+                        var stumble_speed = normal_random(1.1, 0.1);
+                        pushee.behavior = "stumble";
+                        pushee.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], stumble_speed), pushee.updatable));
+                        push_pos = Vector.Vector.plus(blocker.pos, Vector.Vector.times(10, push_dir));
+                        pusher.behavior = "push";
+                        pusher.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], Math.max(0, stumble_speed - 0.2)), pusher.updatable));
+                    }
                     var roll = Math.random();
                     if (roll < 0.1) {
-                        var push_dir = Vector.Vector.norm(Vector.Vector.minus(defender.pos, blocker.pos));
-                        var push_pos = Vector.Vector.plus(defender.pos, Vector.Vector.times(36, push_dir));
-                        var speed_randomization = Math.random() * 0.2;
-                        defender.behavior = "stumble";
-                        defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1 + speed_randomization), defender.updatable));
-                        push_pos = Vector.Vector.plus(blocker.pos, Vector.Vector.times(10, push_dir));
-                        blocker.behavior = "push";
-                        blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7 + speed_randomization), blocker.updatable));
+                        push(blocker, defender);
                     } else if (roll < 0.2) {
-                        var push_dir = Vector.Vector.norm(Vector.Vector.minus(blocker.pos, defender.pos));
-                        var push_pos = Vector.Vector.plus(blocker.pos, Vector.Vector.times(36, push_dir));
-                        var speed_randomization = Math.random() * 0.2;
-                        blocker.behavior = "stumble";
-                        blocker.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 1 + speed_randomization), blocker.updatable));  
-                        push_pos = Vector.Vector.plus(defender.pos, Vector.Vector.times(10, push_dir));
-                        defender.behavior = "push";
-                        defender.updatable.logics.push(new ExpireOnArrivalLogic(new RouteFollower([push_pos], 0.7 + speed_randomization), defender.updatable));                      
+                        push(defender, blocker);                      
                     } else {
                         c.thing1.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing1.updatable));
                         c.thing2.updatable.logics.push(new ExpiringUpdateLogic(new DoNothingLogic(), game.update_interval, c.thing2.updatable));                        
